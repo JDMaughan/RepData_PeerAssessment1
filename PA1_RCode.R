@@ -131,12 +131,15 @@ median(stepsPerDayImputed$TotalSteps)
 ## Are there Differences in activity patterns between weekdays and weekends?
 ##########
 # 1. Create a new factor variable
-activityImputed <- mutate(activityImputed, DayClass = as.factor(ifelse(weekdays(date, abbreviate) %in% c("Saturday", "Sunday"), "Weekend", "Weekday")))
+library(dplyr)
+activityImputed <- mutate(activityImputed, 
+                          DayClass = as.factor(ifelse(weekdays(date) %in% 
+                          c("Saturday", "Sunday"), "Weekend", "Weekday")))
 
 str(activityImputed)
 head(activityImputed)
 
-activityPattern <- group_by(activityImputed, interval, DayClass)%>%
+activityPattern <- group_by(activityImputed, DayClass, interval)%>%
         summarize(MeanSteps = mean(steps))
 str(activityPattern)
 head(activityPattern)
@@ -145,15 +148,15 @@ library(ggplot2)
 library(scales)
 g <- ggplot(activityPattern, 
             aes(strptime(sprintf("%04d", interval), format = "%H%M"), MeanSteps),
-            environment = environment())
-
-g + geom_line() +
+            environment = environment())+ 
+        geom_line() +
         facet_wrap(~ DayClass, nrow = 2) +
         xlab("Time of Day") +
         ggtitle("Average Daily Activity\nWeekday vs. Weekend") +
-        scale_x_datetime(labels = date_format("%H:%M"), breaks = date_breaks("2 hour")) +
+        scale_x_datetime(limits = as.POSIXct(c("2012-10-01 00:00:00", "2012-11-30 24:00:00")), labels = date_format("%H:%M"), breaks = date_breaks("2 hour")) +
         scale_y_continuous("Average Number of Steps") +
         theme(plot.title = element_text(vjust = 2))
+print(g)
 
 
 ## small example to figure out that median returns 0 unles steps > 0 rows are filtered out

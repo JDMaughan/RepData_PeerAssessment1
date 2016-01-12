@@ -2,7 +2,7 @@
 # Introduction
 It is now possible to collect a large amount of data about personal movement using activity monitoring devices such as a Fitbit, Nike Fuelband, or Jawbone Up. These type of devices are part of the “quantified self” movement - a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. But these data remain under-utilized both because the raw data are hard to obtain and there is a lack of statistical methods and software for processing and interpreting the data.
 
-This assignment makes use of data from a personal activity monitoring device. This device collects data at 5 minute intervals through out the day. The data consists of two months of data from an anonymous individual collected during the months of October and November, 2012 and include the number of steps taken in 5 minute intervals each day.
+This assignment makes use of data from a personal activity monitoring device. This device collects data at 5 minute intervals through out the day. The data consists of two months of data from an anonymous individual collected during the months of October and November, 2012 and include the number of steps taken in 5 minute intervals each day.  
 
 #Analysis
 
@@ -27,9 +27,9 @@ str(activityData)
 ```
 
 The variables in this dataset are:  
-*-steps*:  Number of steps taken in a 5-minute interval.  Missing values are coded as **'NA'**.  
-*-date*:  The date on which the measurement was taken in YYYY-MM-DD format. Note the conversion to Date format after reading in the data.  
-*-interval*: An identifier for the 5-minute interval in which the measurement was taken. For example, 1435 means the measurement was taken at 14:35, or 2:35 pm.  
+**-steps**:  Number of steps taken in a 5-minute interval.  Missing values are coded as **'NA'**.  
+**-date**:  The date on which the measurement was taken in YYYY-MM-DD format. Note the conversion to Date format after reading in the data.  
+**-interval**: An identifier for the 5-minute interval in which the measurement was taken. For example, 1435 means the measurement was taken at 14:35, or 2:35 pm.  
 
 
 ## What is mean total number of steps taken per day?
@@ -190,6 +190,11 @@ plot(strptime(sprintf("%04d", stepsPerInterval$interval), format = "%H%M"),
 The interval with the highest average number of steps is 0835, or 8:35 am.  The average number of steps in this 5-minute interval is just over 206 steps.  This seems logical since most people are getting ready for and going to work at this time of day. 
 
 
+```r
+maxDate <- arrange(stepsPerInterval, desc(AvgIntSteps))[1,] 
+maxDate
+```
+
 ```
 ## Source: local data frame [1 x 2]
 ## 
@@ -197,7 +202,6 @@ The interval with the highest average number of steps is 0835, or 8:35 am.  The 
 ##      (int)       (dbl)
 ## 1      835    206.1698
 ```
-
 
 ## Imputing missing values
 ### 1. Calculate and report the total number of missing values  
@@ -213,7 +217,6 @@ colSums(is.na(activityData))
 There are 2304 rows with 'NA' in steps column.  Other columns have no **NA**'s.
 
 #### 2./3. Devise a new strategy for filling in all of the missing values in the dataset.  Create a new dataset, 
-
 We'll replace the **'NA'** values with the mean for that day, using the stepsPerInterval$AvgIntSteps value.  We'll test each value of "steps", and if it is **NA** then we will replace it with the AvgIntSteps calcuated above.  If it is not **NA**, then we will just use the existing value of "steps".
 
 
@@ -236,7 +239,7 @@ head(activityImputed)
 ```
 
 ### 4. Make a histogram of the total number of steps taken each day. What is the impact of imputing missing data on the estimates of total daily number of steps?  
-Imputing the **NA** values didn't change the overall distribution.  In fact, the only thing that changed was the frequency in which the mean value occurred.  This makes sense, since we are now including more values that are, in fact, the mean value we used to replace the **NA**'s.
+As with the original data, we'll sum up the steps by date in the new dataset with imputed **NA** values.
 
 
 ```r
@@ -273,6 +276,7 @@ hist(stepsPerDayImputed$TotalSteps,
 ```
 
 ![](PA1_template_files/figure-html/unnamed-chunk-12-1.png) 
+Imputing the **NA** values didn't change the overall distribution.  In fact, the only thing that changed was the frequency in which the mean value occurred.  This makes sense, since we are now including more values that are, in fact, the mean value we used to replace the **NA**'s.  
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
@@ -346,9 +350,16 @@ head(activityPattern)
 
 From the graphs below, it's clear that activity is different on weekends than it is on weekdays.  Weekend activity is generally higher throughout the day, whereas is drops during the working hours of weekday.  It is also noteworthy that weekend morning activity generally starts a bit later in the morning hours.  
 
-**NOTE** Figuring out why x-axis is not sorted properly.  Will update when I have it figured out.
+
+```r
+library(lattice)
+xyplot(MeanSteps ~ interval | DayClass, data = activityPattern, type = "l", layout = c(1,2),
+        groups = DayClass,
+        xlab = "Interval",
+        ylab = "Mean Number of Steps Taken",
+        ggtitle = "Average Number of Steps Taken\nWeekend vs. Weekday")
+```
 
 ![](PA1_template_files/figure-html/unnamed-chunk-15-1.png) 
-
 
 
